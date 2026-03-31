@@ -45,12 +45,25 @@ exports.addTransaction = async (req, res) => {
 
         await User.findByIdAndUpdate(userId, updateQuery);
 
+
+
+        // Create a better alert message
+        let alertMessage = "No alert";
+        if (alert === "75_percent") {
+        alertMessage = "⚠️ WARNING: You've reached 75% of your budget!";
+        } else if (alert === "90_percent") {
+        alertMessage = "🚨 CRITICAL: You've reached 90% of your budget!";
+        }
+
         // 5. Response for the Frontend
+        const updatedUser = await User.findByIdAndUpdate(userId, updateQuery, { new: true });
+
         res.status(201).json({ 
             message: "Success", 
             data: newTransaction,
             savings_sweep: savings,
-            notification: alert || "none" 
+            notification: alert || "none",
+            remaining_budget: updatedUser.monthly_budget - updatedUser.current_monthly_spend
         });
 
     } catch (error) {
